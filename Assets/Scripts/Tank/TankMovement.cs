@@ -9,6 +9,8 @@ public class TankMovement : MonoBehaviour
     public AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
     public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
     public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
+    public float m_SpeedTimer = 8f;
+    public GameObject pickupEffect;            
 
 
     private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
@@ -17,7 +19,7 @@ public class TankMovement : MonoBehaviour
     private float m_MovementInputValue;         // The current value of the movement input.
     private float m_TurnInputValue;             // The current value of the turn input.
     private float m_OriginalPitch;              // The pitch of the audio source at the start of the scene.
-
+    private bool SpeedBoost;
 
     private void Awake()
     {
@@ -61,6 +63,21 @@ public class TankMovement : MonoBehaviour
         m_TurnInputValue = Input.GetAxis(m_TurnAxisName);
 
         EngineAudio();
+
+        if (SpeedBoost == true)
+        {
+            m_Speed = 30f;
+            m_SpeedTimer = m_SpeedTimer - Time.deltaTime;
+        }
+        if (m_SpeedTimer <= 0f)
+        {
+            StopSpeedBoost(); 
+            
+        }
+        if (GameManager.instance.m_RoundChange2 == true)
+        {
+            StopSpeedBoost();
+        }
     }
 
 
@@ -120,5 +137,22 @@ public class TankMovement : MonoBehaviour
 
         // Apply this rotation to the rigidbody's rotation.
         m_Rigidbody.MoveRotation(m_Rigidbody.rotation * turnRotation);
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Speed"))
+        {
+            Instantiate(pickupEffect, transform.position, transform.rotation);
+            SpeedBoost = true;
+
+            Destroy(other.gameObject);
+        }
+    }
+
+    public void StopSpeedBoost()
+    {
+        SpeedBoost = false;
+        m_Speed = 12f;
+        m_SpeedTimer = 8f;
     }
 }

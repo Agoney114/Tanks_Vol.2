@@ -18,9 +18,14 @@ public class GameManager : MonoBehaviour
     private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
     private TankManager m_RoundWinner;          // Reference to the winner of the current round.  Used to make an announcement of who won.
     private TankManager m_GameWinner;           // Reference to the winner of the game.  Used to make an announcement of who won.
+    public bool m_RoundChange = false;
+    public bool m_RoundChange2 = false;
+    public static GameManager instance;
+    public float m_Timer;
 
 
-    
+
+
     private void Start()
     {
         // Create the delays so they only have to be made once.
@@ -32,8 +37,34 @@ public class GameManager : MonoBehaviour
 
         // Once the tanks have been created and the camera is using them as targets, start the game.
         StartCoroutine(GameLoop());
+
+        m_RoundChange = false;
+        m_RoundChange2 = false;
+
+        if (GameManager.instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
     }
 
+    private void Update()
+    {
+        if (m_RoundChange == true)
+        {
+            m_Timer = m_Timer - Time.deltaTime;
+        }
+
+        if(m_Timer <=0)
+        {
+            m_RoundChange = false;
+            m_RoundChange2 = false;
+            m_Timer = 7f;
+        }
+    }
 
     private void SpawnAllTanks()
     {
@@ -130,6 +161,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator RoundEnding()
     {
+        m_RoundChange = true;
+        m_RoundChange2 = true;
         // Stop tanks from moving.
         DisableTankControl();
 
